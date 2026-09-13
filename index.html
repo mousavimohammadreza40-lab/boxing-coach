@@ -2,169 +2,930 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مربی بوکس هوشمند | Boxing Coach AI</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>مربی بوکس | Boxing Coach</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      font-family: 'Vazirmatn', sans-serif;
+      background: #0a0a0f;
+      color: #fff;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    /* ===== ANIMATED BACKGROUND ===== */
+    .bg-canvas {
+      position: fixed; inset: 0; z-index: 0;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a0a0a 50%, #0a0a1a 100%);
+    }
+    .bg-orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4;
+      animation: orbFloat 8s ease-in-out infinite;
+    }
+    .bg-orb:nth-child(1) {
+      width: 300px; height: 300px; background: #ff2d2d;
+      top: -50px; left: -50px; animation-delay: 0s;
+    }
+    .bg-orb:nth-child(2) {
+      width: 250px; height: 250px; background: #ff6b00;
+      bottom: -30px; right: -30px; animation-delay: -3s;
+    }
+    .bg-orb:nth-child(3) {
+      width: 180px; height: 180px; background: #8b00ff;
+      top: 40%; left: 50%; animation-delay: -5s;
+    }
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(30px, -20px) scale(1.1); }
+      50% { transform: translate(-20px, 30px) scale(0.9); }
+      75% { transform: translate(20px, 20px) scale(1.05); }
+    }
+
+    /* Particles */
+    .particles {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 3px; height: 3px;
+      background: rgba(255, 77, 77, 0.6);
+      border-radius: 50%;
+      animation: particleRise linear infinite;
+    }
+    @keyframes particleRise {
+      0% { transform: translateY(100vh) scale(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    /* ===== PHONE CONTAINER ===== */
+    .phone-frame {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 430px;
+      height: 100dvh; height: 100vh;
+      margin: 0 auto;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      background: rgba(10, 10, 15, 0.6);
+    }
+
+    /* ===== SPLASH SCREEN ===== */
+    .splash-screen {
+      position: fixed; inset: 0; z-index: 1000;
+      background: #0a0a0f;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .splash-screen.hide {
+      opacity: 0; transform: scale(1.1);
+      pointer-events: none;
+    }
+    .splash-glove {
+      font-size: 6rem;
+      animation: gloveFight 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px rgba(255, 77, 77, 0.8));
+    }
+    @keyframes gloveFight {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.2) rotate(-10deg); }
+      50% { transform: scale(1) rotate(0deg); }
+      75% { transform: scale(1.2) rotate(10deg); }
+    }
+    .splash-title {
+      margin-top: 20px; font-size: 1.8rem; font-weight: 900;
+      background: linear-gradient(90deg, #ff4d4d, #ff8c00, #ff4d4d);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 2s linear infinite;
+    }
+    @keyframes shimmer {
+      to { background-position: 200% center; }
+    }
+    .splash-sub {
+      color: #666; font-size: 0.85rem; margin-top: 8px; letter-spacing: 2px;
+    }
+    .splash-progress {
+      position: absolute; bottom: 60px;
+      width: 200px; height: 3px;
+      background: #222; border-radius: 3px; overflow: hidden;
+    }
+    .splash-progress-bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #ff4d4d, #ff8c00);
+      border-radius: 3px;
+      animation: progressFill 5s ease-out forwards;
+    }
+    @keyframes progressFill {
+      to { width: 100%; }
+    }
+    .splash-rounds {
+      position: absolute; bottom: 40px;
+      font-size: 0.75rem; color: #444;
+    }
+
+    /* ===== TOKEN SCREEN ===== */
+    .screen {
+      display: none; flex-direction: column;
+      height: 100%; flex: 1; min-height: 0;
+    }
+    .screen.active { display: flex; }
+
+    .token-screen {
+      justify-content: center; align-items: center;
+      padding: 30px; gap: 20px;
+    }
+    .token-logo {
+      font-size: 4rem;
+      animation: gloveFight 2s ease-in-out infinite;
+    }
+    .token-title {
+      font-size: 1.5rem; font-weight: 900; text-align: center;
+    }
+    .token-desc {
+      font-size: 0.8rem; color: #888; text-align: center; line-height: 1.8;
+    }
+    .token-section {
+      width: 100%; background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 16px; gap: 12px;
+    }
+    .token-field {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .token-field label {
+      font-size: 0.75rem; color: #888; font-weight: 500;
+    }
+    .token-field input, .token-field select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 12px 14px;
+      color: #fff; font-family: inherit; font-size: 0.9rem;
+      transition: border-color 0.3s;
+    }
+    .token-field input:focus, .token-field select:focus {
+      outline: none; border-color: #ff4d4d;
+    }
+    .token-field select option { background: #1a1a1a; }
+    .token-btn {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, #ff4d4d, #ff6b00);
+      border: none; border-radius: 12px;
+      color: #fff; font-family: inherit; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .token-btn:active { transform: scale(0.97); }
+    .token-btn:hover { box-shadow: 0 4px 20px rgba(255, 77, 77, 0.4); }
+    .token-hint {
+      font-size: 0.7rem; color: #555; text-align: center; line-height: 1.6;
+    }
+    .token-hint a { color: #ff4d4d; text-decoration: none; }
+
+    /* ===== CHAT SCREEN ===== */
+    .chat-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px;
+      background: rgba(10,10,15,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    .header-back {
+      background: none; border: none; color: #fff; font-size: 1.2rem;
+      cursor: pointer; padding: 4px;
+    }
+    .header-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #ff4d4d, #ff6b00);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .header-info { flex: 1; }
+    .header-name { font-size: 0.95rem; font-weight: 700; }
+    .header-status {
+      font-size: 0.7rem; color: #4ade80;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .header-status::before {
+      content: ''; width: 6px; height: 6px;
+      background: #4ade80; border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
+    .header-actions { display: flex; gap: 8px; }
+    .header-btn {
+      background: rgba(255,255,255,0.05);
+      border: none; border-radius: 8px;
+      color: #aaa; font-size: 1rem;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .header-btn:hover { color: #ff4d4d; background: rgba(255,77,77,0.1); }
+
+    /* Messages */
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+      scroll-behavior: smooth;
+    }
+    .message {
+      display: flex; gap: 8px; max-width: 85%;
+      animation: msgIn 0.3s ease;
+    }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message.bot { align-self: flex-start; }
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
+    .msg-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; flex-shrink: 0;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .msg-bubble {
+      padding: 10px 14px; border-radius: 14px;
+      font-size: 0.88rem; line-height: 1.7;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .bot .msg-bubble {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-top-right-radius: 4px;
+    }
+    .user .msg-bubble {
+      background: linear-gradient(135deg, #ff4d4d, #e63946);
+      border-top-left-radius: 4px;
+    }
+    .msg-bubble strong { color: #ff8c00; }
+    .msg-bubble code {
+      background: rgba(255,255,255,0.1);
+      padding: 1px 5px; border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    /* Typing */
+    .typing-dots { display: flex; gap: 4px; padding: 4px 0; }
+    .typing-dots span {
+      width: 6px; height: 6px; background: #555;
+      border-radius: 50%; animation: dotBounce 1.4s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotBounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Quick Chips */
+    .quick-chips {
+      display: flex; gap: 8px; padding: 8px 16px;
+      overflow-x: auto; flex-shrink: 0;
+      scrollbar-width: none;
+    }
+    .quick-chips::-webkit-scrollbar { display: none; }
+    .chip {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 7px 14px;
+      color: #ccc; font-size: 0.78rem;
+      cursor: pointer; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .chip:hover, .chip:active {
+      border-color: #ff4d4d; color: #ff4d4d;
+      background: rgba(255,77,77,0.08);
+    }
+
+    /* Input Area */
+    .chat-input-area {
+      display: flex; align-items: flex-end; gap: 8px;
+      padding: 10px 12px 14px;
+      background: rgba(10,10,15,0.9);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    .chat-input {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 22px;
+      padding: 10px 16px;
+      color: #fff; font-family: inherit; font-size: 0.9rem;
+      resize: none; max-height: 120px;
+      min-height: 42px; line-height: 1.5;
+      transition: border-color 0.3s;
+    }
+    .chat-input:focus { outline: none; border-color: rgba(255,77,77,0.5); }
+    .chat-input::placeholder { color: #555; }
+    .input-btn {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .send-btn {
+      background: linear-gradient(135deg, #ff4d4d, #ff6b00);
+      color: #fff; font-size: 1.1rem;
+    }
+    .send-btn:disabled { opacity: 0.4; }
+    .send-btn:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 2px 12px rgba(255,77,77,0.4); }
+    .voice-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #aaa; font-size: 1rem;
+    }
+    .voice-btn:hover { color: #ff4d4d; border-color: #ff4d4d; }
+    .voice-btn.recording {
+      background: rgba(255,77,77,0.2);
+      border-color: #ff4d4d; color: #ff4d4d;
+      animation: pulse 1s infinite;
+    }
+
+    /* ===== PATH SELECTOR OVERLAY ===== */
+    .path-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .path-overlay.active { display: flex; }
+    .path-card {
+      background: rgba(20,20,30,0.95);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 24px;
+      width: 100%; max-width: 360px;
+    }
+    .path-card h2 {
+      font-size: 1.1rem; margin-bottom: 16px; text-align: center;
+    }
+    .path-option {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      cursor: pointer; transition: all 0.2s; margin-bottom: 8px;
+    }
+    .path-option:hover, .path-option.selected {
+      border-color: #ff4d4d; background: rgba(255,77,77,0.08);
+    }
+    .path-option-icon { font-size: 1.5rem; }
+    .path-option-text { flex: 1; }
+    .path-option-title { font-size: 0.9rem; font-weight: 600; }
+    .path-option-desc { font-size: 0.7rem; color: #888; margin-top: 2px; }
+
+    /* Error toast */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: rgba(255, 77, 77, 0.9);
+      color: #fff; padding: 10px 20px; border-radius: 10px;
+      font-size: 0.8rem; z-index: 999;
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+    }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } }
+    @keyframes toastOut { to { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+  </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="logo">
-      <span class="logo-icon">🥊</span>
-      <div class="logo-text">
-        <h1>مربی بوکس</h1>
-        <p>Boxing Coach AI</p>
+
+<!-- ===== ANIMATED BACKGROUND ===== -->
+<div class="bg-canvas">
+  <div class="bg-orb"></div>
+  <div class="bg-orb"></div>
+  <div class="bg-orb"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<!-- ===== SPLASH SCREEN ===== -->
+<div class="splash-screen" id="splash">
+  <div class="splash-glove">🥊</div>
+  <div class="splash-title">مربی بوکس</div>
+  <div class="splash-sub">BOXING COACH AI</div>
+  <div class="splash-progress"><div class="splash-progress-bar"></div></div>
+  <div class="splash-rounds" id="splashText">آماده‌سازی...</div>
+</div>
+
+<!-- ===== PHONE FRAME ===== -->
+<div class="phone-frame">
+
+  <!-- TOKEN SCREEN -->
+  <div class="screen token-screen" id="tokenScreen">
+    <div class="token-logo">🥊</div>
+    <div class="token-title">مربی هوشمند بوکس</div>
+    <div class="token-desc">تنظیمات اتصال به هوش مصنوعی<br>جهت شروع وارد کنید</div>
+
+    <div class="token-section">
+      <div class="token-field">
+        <label>🔑 کلید API</label>
+        <input type="password" id="apiKeyInput" placeholder="sk-..." autocomplete="off">
       </div>
     </div>
-    <div class="header-controls">
-      <button id="langToggle" class="btn-lang">EN/FA</button>
-      <button id="clearChat" class="btn-clear" title="پاک کردن چت">🗑️</button>
-      <button id="settingsBtn" class="btn-settings">⚙️</button>
+
+    <div class="token-section">
+      <div class="token-field">
+        <label>🤖 مدل هوش مصنوعی</label>
+        <select id="modelSelect">
+          <option value="gpt-4o-mini">GPT-4o Mini — سریع و بهینه</option>
+          <option value="gpt-4o">GPT-4o — قدرتمندترین</option>
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo — سبک</option>
+        </select>
+      </div>
     </div>
-  </header>
 
-  <!-- Main Layout -->
-  <main class="main-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-section">
-        <h3>🎯 مسیر یادگیری</h3>
-        <div class="training-paths">
-          <button class="path-btn active" data-path="beginner">
-            <span class="path-icon">🌱</span>
-            <span class="path-name" data-fa="مبتدی" data-en="Beginner">مبتدی</span>
-          </button>
-          <button class="path-btn" data-path="intermediate">
-            <span class="path-icon">🔥</span>
-            <span class="path-name" data-fa="متوسط" data-en="Intermediate">متوسط</span>
-          </button>
-          <button class="path-btn" data-path="advanced">
-            <span class="path-icon">💎</span>
-            <span class="path-name" data-fa="پیشرفته" data-en="Advanced">پیشرفته</span>
-          </button>
-          <button class="path-btn" data-path="fitness">
-            <span class="path-icon">💪</span>
-            <span class="path-name" data-fa="تناسب اندام" data-en="Fitness">تناسب اندام</span>
-          </button>
-        </div>
+    <div class="token-section">
+      <div class="token-field">
+        <label>🌐 زبان رابط کاربری</label>
+        <select id="langSelect">
+          <option value="fa">فارسی</option>
+          <option value="en">English</option>
+        </select>
       </div>
+    </div>
 
-      <div class="sidebar-section">
-        <h3>📚 موضوعات محبوب</h3>
-        <div class="topics">
-          <button class="topic-btn" data-topic="jab-cross">جَب و کراس 🥊</button>
-          <button class="topic-btn" data-topic="footwork">فوت‌ورک</button>
-          <button class="topic-btn" data-topic="defense">دفاع شخصی</button>
-          <button class="topic-btn" data-topic="conditioning">تمرین استقامت</button>
-          <button class="topic-btn" data-topic="combination">کمبینیشن‌ها</button>
-          <button class="topic-btn" data-topic="weight-loss">کاهش وزن</button>
-        </div>
-      </div>
-
-      <div class="sidebar-section">
-        <div class="stats-box">
-          <div class="stat-item">
-            <span class="stat-value" id="msgCount">0</span>
-            <span class="stat-label" data-fa="پیام" data-en="Messages">پیام</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-value" id="sessionId">-</span>
-            <span class="stat-label" data-fa="جلسه" data-en="Session">جلسه</span>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Chat Area -->
-    <section class="chat-area">
-      <div class="chat-header">
-        <button id="menuToggle" class="menu-toggle">☰</button>
-        <div class="chat-title">
-          <span class="status-dot"></span>
-          <span data-fa="مربی هوشمند شما آماده است" data-en="Your AI Coach is Ready">مربی هوشمند شما آماده است</span>
-        </div>
-      </div>
-
-      <div class="chat-messages" id="chatMessages">
-        <!-- Welcome message -->
-        <div class="message bot-message">
-          <div class="avatar">🥊</div>
-          <div class="bubble">
-            <p data-fa="سلام! من مربی هوش مصنوعی بوکس تو هستم. 🤜" data-en="Hi! I'm your AI Boxing Coach. 🤜">سلام! من مربی هوش مصنوعی بوکس تو هستم. 🤜</p>
-            <p data-fa="می‌تونی هر سوالی درباره بوکس داری بپرسی. مثلاً:" data-en="Ask me anything about boxing. For example:">می‌تونی هر سوالی درباره بوکس داری بپرسی. مثلاً:</p>
-            <ul>
-              <li data-fa="جَب چیست و چطور یادش بگیرم؟" data-en="What is a jab and how do I learn it?">جَب چیست و چطور یادش بگیرم؟</li>
-              <li data-fa="برنامه تمرینی یک هفته‌ای می‌خوام" data-en="I want a one-week training plan">برنامه تمرینی یک هفته‌ای می‌خوام</li>
-              <li data-fa="چطور ضربه کراس بزنم؟" data-en="How do I throw a cross?">چطور ضربه کراس بزنم؟</li>
-              <li data-fa="راه‌های دفاع در برابر حریف" data-en="Ways to defend against an opponent">راه‌های دفاع در برابر حریف</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="quick-actions" id="quickActions">
-        <button class="quick-btn" data-prompt="یه برنامه تمرینی برای مبتدی‌ها طراحی کن">📋 برنامه تمرینی</button>
-        <button class="quick-btn" data-prompt="یه کمبینیشن ساده یادم بده">🥊 کمبینیشن ساده</button>
-        <button class="quick-btn" data-prompt="چطور مستقیم وارد بوکس بشم؟" data-fa-only>ورود به بوکس</button>
-        <button class="quick-btn" data-prompt="ویدیو آموزشی فوت‌ورک" data-fa-only>👟 فوت‌ورک</button>
-      </div>
-
-      <!-- Input Area -->
-      <div class="chat-input-area">
-        <textarea id="userInput" class="chat-input" rows="1" 
-          data-placeholder-fa="پیامت رو بنویس... (Enter = ارسال، Shift+Enter = خط جدید)"
-          data-placeholder-en="Type your message... (Enter = send, Shift+Enter = new line)"
-          placeholder="پیامت رو بنویس..."></textarea>
-        <button id="sendBtn" class="send-btn" aria-label="ارسال">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-        </button>
-        <button id="voiceBtn" class="voice-btn" title="Voice input">🎤</button>
-      </div>
-    </section>
-  </main>
-
-  <!-- Settings Modal -->
-  <div class="modal-overlay" id="settingsModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 data-fa="⚙️ تنظیمات" data-en="⚙️ Settings">⚙️ تنظیمات</h2>
-        <button class="modal-close" id="closeSettings">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="setting-group">
-          <label data-fa="کلید API (OpenAI)" data-en="API Key (OpenAI)">کلید API (OpenAI)</label>
-          <input type="password" id="apiKeyInput" class="setting-input" 
-            placeholder="sk-..." autocomplete="off">
-          <small data-fa="کلیدت فقط در مرورگرت می‌مونه" data-en="Your key stays only in your browser">کلیدت فقط در مرورگرت می‌مونه</small>
-        </div>
-        <div class="setting-group">
-          <label data-fa="مدل هوش مصنوعی" data-en="AI Model">مدل هوش مصنوعی</label>
-          <select id="modelSelect" class="setting-input">
-            <option value="gpt-4o-mini">GPT-4o Mini (سریع + ارزان)</option>
-            <option value="gpt-4o">GPT-4o (قدرتمند)</option>
-            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (سبک)</option>
-          </select>
-        </div>
-        <div class="setting-group">
-          <label data-fa="زبان رابط کاربری" data-en="UI Language">زبان رابط کاربری</label>
-          <select id="langSelect" class="setting-input">
-            <option value="fa">فارسی</option>
-            <option value="en">English</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="saveSettings" class="btn-save">ذخیره ✅</button>
-      </div>
+    <button class="token-btn" id="startBtn">شروع تمرین 🥊</button>
+    <div class="token-hint">
+      کلید API از
+      <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a>
+      دریافت کنید. فقط در دستگاه شما ذخیره می‌شود.
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- CHAT SCREEN -->
+  <div class="screen" id="chatScreen">
+    <div class="chat-header">
+      <div class="header-avatar">🥊</div>
+      <div class="header-info">
+        <div class="header-name">مربی هوشمند</div>
+        <div class="header-status">آنلاین</div>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" id="settingsBtn" title="تنظیمات">⚙️</button>
+        <button class="header-btn" id="clearBtn" title="پاک کردن">🗑️</button>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot">
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-bubble">سلام! من مربی بوکس هوش مصنوعی تو هستم. 🤜
+
+هر سوالی داری بپرس — از تکنیک ساده تا استراتژی مسابقه!</div>
+      </div>
+    </div>
+
+    <div class="quick-chips" id="quickChips">
+      <button class="chip" data-prompt="یه برنامه تمرینی یک هفته‌ای برای مبتدی بنویس">📋 برنامه هفتگی</button>
+      <button class="chip" data-prompt="جَب و کراس رو کامل توضیح بده">🥊 جَب و کراس</button>
+      <button class="chip" data-prompt="فوت‌ورک چیه و چطور یادش بگیرم؟">👟 فوت‌ورک</button>
+      <button class="chip" data-prompt="راه‌های دفاع در برابر ضربه حریف">🛡️ دفاع</button>
+      <button class="chip" data-prompt="یه کمبینیشن سه ضربه‌ای یادم بده">⚡ کمبینیشن</button>
+      <button class="chip" data-prompt="تمرینات تناسب اندام با بوکس">💪 تناسب اندام</button>
+    </div>
+
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="userInput" rows="1" placeholder="پیامت رو بنویس..."></textarea>
+      <button class="input-btn voice-btn" id="voiceBtn">🎤</button>
+      <button class="input-btn send-btn" id="sendBtn">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PATH SELECTOR ===== -->
+<div class="path-overlay" id="pathOverlay">
+  <div class="path-card">
+    <h2>🎯 مسیر تمرینی خودتو انتخاب کن</h2>
+    <div class="path-option selected" data-path="beginner">
+      <span class="path-option-icon">🌱</span>
+      <div class="path-option-text">
+        <div class="path-option-title">مبتدی</div>
+        <div class="path-option-desc">اصول اولیه، ضربات پایه، وضعیت بدن</div>
+      </div>
+    </div>
+    <div class="path-option" data-path="intermediate">
+      <span class="path-option-icon">🔥</span>
+      <div class="path-option-text">
+        <div class="path-option-title">متوسط</div>
+        <div class="path-option-desc">تکنیک‌ها، ترکیبات، استراتژی مبارزه</div>
+      </div>
+    </div>
+    <div class="path-option" data-path="advanced">
+      <span class="path-option-icon">💎</span>
+      <div class="path-option-text">
+        <div class="path-option-title">پیشرفته</div>
+        <div class="path-option-desc">ریزه‌کاری‌ها، تاکتیک، تحلیل حریف</div>
+      </div>
+    </div>
+    <div class="path-option" data-path="fitness">
+      <span class="path-option-icon">💪</span>
+      <div class="path-option-text">
+        <div class="path-option-title">تناسب اندام</div>
+        <div class="path-option-desc">بوکس فانکشنال، چربی‌سوزی، استقامت</div>
+      </div>
+    </div>
+    <button class="token-btn" id="confirmPath" style="margin-top:12px">تأیید ✅</button>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+const state = {
+  lang: 'fa', model: 'gpt-4o-mini', apiKey: '', path: 'beginner',
+  messages: [], isStreaming: false, sessionId: ''
+};
+
+// ===== PARTICLES =====
+(function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (6 + Math.random() * 8) + 's';
+    p.style.animationDelay = (Math.random() * 6) + 's';
+    p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+    container.appendChild(p);
+  }
+})();
+
+// ===== SPLASH =====
+const splashMsgs = [
+  { fa: 'آماده‌سازی...', en: 'Loading...' },
+  { fa: 'بارگذاری مربی...', en: 'Loading coach...' },
+  { fa: 'گرم‌کردن...', en: 'Warming up...' },
+  { fa: 'بستن دستکش‌ها...', en: 'Taping gloves...' },
+  { fa: 'ورود به رینگ!', en: 'Entering the ring!' }
+];
+
+setTimeout(() => {
+  let idx = 0;
+  const interval = setInterval(() => {
+    idx++;
+    if (idx < splashMsgs.length) {
+      const m = splashMsgs[idx][state.lang] || splashMsgs[idx].en;
+      document.getElementById('splashText').textContent = m;
+    }
+  }, 1000);
+  setTimeout(() => { clearInterval(interval); }, 5000);
+}, 0);
+
+setTimeout(() => {
+  document.getElementById('splash').classList.add('hide');
+  setTimeout(() => {
+    document.getElementById('splash').style.display = 'none';
+    showTokenScreen();
+  }, 800);
+}, 5200);
+
+// ===== STORAGE =====
+function loadState() {
+  try {
+    const s = localStorage.getItem('boxingState');
+    if (s) {
+      const d = JSON.parse(s);
+      state.apiKey = d.apiKey || '';
+      state.model = d.model || 'gpt-4o-mini';
+      state.lang = d.lang || 'fa';
+      state.path = d.path || 'beginner';
+      state.messages = d.messages || [];
+      state.sessionId = d.sessionId || ('S' + Date.now().toString(36).toUpperCase());
+    }
+  } catch(e) {}
+}
+
+function saveState() {
+  localStorage.setItem('boxingState', JSON.stringify({
+    apiKey: state.apiKey, model: state.model, lang: state.lang,
+    path: state.path, messages: state.messages.slice(-50), sessionId: state.sessionId
+  }));
+}
+
+loadState();
+
+// ===== SCREENS =====
+function showTokenScreen() {
+  document.getElementById('tokenScreen').classList.add('active');
+  if (state.apiKey) {
+    document.getElementById('apiKeyInput').value = state.apiKey;
+    document.getElementById('modelSelect').value = state.model;
+    document.getElementById('langSelect').value = state.lang;
+  }
+}
+
+function startApp() {
+  state.apiKey = document.getElementById('apiKeyInput').value.trim();
+  state.model = document.getElementById('modelSelect').value;
+  state.lang = document.getElementById('langSelect').value;
+
+  if (!state.apiKey) {
+    showToast(state.lang === 'fa' ? '⚠️ لطفاً کلید API رو وارد کن' : '⚠️ Please enter your API key');
+    return;
+  }
+
+  document.getElementById('tokenScreen').classList.remove('active');
+  document.getElementById('chatScreen').classList.add('active');
+
+  // Apply language
+  document.documentElement.lang = state.lang;
+  document.documentElement.dir = state.lang === 'fa' ? 'rtl' : 'ltr';
+
+  // Rebuild chips
+  buildChips();
+
+  // Show path selector if first time
+  if (state.messages.length === 0) {
+    document.getElementById('pathOverlay').classList.add('active');
+  } else {
+    // Restore welcome
+    addBotMessage(state.lang === 'fa'
+      ? 'سلام! دوباره خوش اومدی. 🥊 امروز چی کار می‌کنیم؟'
+      : 'Welcome back! 🥊 What are we working on today?');
+  }
+
+  saveState();
+}
+
+document.getElementById('startBtn').addEventListener('click', startApp);
+
+// ===== PATH SELECTOR =====
+let selectedPath = 'beginner';
+document.querySelectorAll('.path-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.path-option').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    selectedPath = opt.dataset.path;
+  });
+});
+document.getElementById('confirmPath').addEventListener('click', () => {
+  state.path = selectedPath;
+  document.getElementById('pathOverlay').classList.remove('active');
+  saveState();
+  addBotMessage(state.lang === 'fa'
+    ? `✅ مسیر ${getPathName(state.path)} فعال شد. بزن بریم!`
+    : `✅ ${getPathName(state.path)} mode active. Let's go!`);
+});
+
+function getPathName(p) {
+  const names = { beginner: 'مبتدی', intermediate: 'متوسط', advanced: 'پیشرفته', fitness: 'تناسب اندام' };
+  return names[p] || p;
+}
+
+// ===== SYSTEM PROMPT =====
+function getSystemPrompt() {
+  const prompts = {
+    fa: {
+      beginner: 'تو یه مربی بوکس حرفه‌ای و صبور هستی. شاگردت مبتدی‌ه. مفاهیم رو خیلی ساده و با مثال عملی توضیح بده. هر بار فقط ۱-۲ نکته بگو. لحن گرم و انگیزشی باشه.',
+      intermediate: 'تو مربی بوکس باتجربه‌ای. شاگرد اصول اولیه رو بلده. روی تکنیک دقیق، ترکیبات ضربات و استراتژی کار کنید. جزئیات فنی بده ولی قابل فهم.',
+      advanced: 'تو مربی بوکس المپیکی هستی. شاگرد حرفه‌ایه. ریزه‌کاری‌های تکنیکی، تاکتیک پیشرفته، تحلیل حریف و آمادگی ذهنی رو پوشش بده.',
+      fitness: 'تو مربی بوکس فانکشنال هستی. هدف شاگرد تناسب اندام و چربی‌سوزیه نه مسابقه. تمرینات پرفشار و طناب و کالیستنیکس پیشنهاد بده.'
+    },
+    en: {
+      beginner: 'You are a professional and patient boxing coach. Your student is a complete beginner. Explain concepts simply with practical examples. Only cover 1-2 tips at a time. Keep your tone warm and motivating.',
+      intermediate: 'You are an experienced boxing coach. Your student knows the basics. Focus on precise technique, punch combinations, and fight strategy. Give technical details but keep them accessible.',
+      advanced: 'You are an Olympic-level boxing coach. Your student is professional. Focus on subtle technical details, advanced tactics, opponent analysis, and mental preparation.',
+      fitness: 'You are a functional boxing fitness coach. Your client wants fitness and fat loss, not competition. Suggest high-intensity workouts, rope training, and boxing calisthenics.'
+    }
+  };
+  return prompts[state.lang]?.[state.path] || prompts.fa.beginner;
+}
+
+// ===== MESSAGING =====
+async function sendMessage(text) {
+  if (!text?.trim() || state.isStreaming) return;
+  state.isStreaming = true;
+  updateSendBtn();
+
+  addUserMessage(text);
+  state.messages.push({ role: 'user', content: text });
+  saveState();
+
+  showTyping();
+
+  try {
+    const reply = await callAI(text);
+    removeTyping();
+    addBotMessage(reply);
+    state.messages.push({ role: 'assistant', content: reply });
+    saveState();
+  } catch (err) {
+    removeTyping();
+    addErrorMessage(err.message || 'خطا در ارتباط');
+  } finally {
+    state.isStreaming = false;
+    updateSendBtn();
+  }
+}
+
+async function callAI(userMsg) {
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${state.apiKey}`
+    },
+    body: JSON.stringify({
+      model: state.model,
+      messages: [
+        { role: 'system', content: getSystemPrompt() },
+        ...state.messages.slice(-20)
+      ],
+      temperature: 0.8,
+      max_tokens: 500
+    })
+  });
+  if (!res.ok) {
+    const d = await res.json().catch(() => ({}));
+    throw new Error(d.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return data.choices[0].message.content.trim();
+}
+
+// ===== UI HELPERS =====
+function addUserMessage(text) {
+  const c = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'message user';
+  div.innerHTML = `<div class="msg-avatar">🧑</div><div class="msg-bubble">${esc(text)}</div>`;
+  c.appendChild(div);
+  scrollToBottom();
+}
+
+function addBotMessage(text) {
+  const c = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'message bot';
+  div.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble">${fmt(text)}</div>`;
+  c.appendChild(div);
+  scrollToBottom();
+}
+
+function showTyping() {
+  const c = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'message bot';
+  div.id = 'typingMsg';
+  div.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(div);
+  scrollToBottom();
+}
+
+function removeTyping() {
+  document.getElementById('typingMsg')?.remove();
+}
+
+function addErrorMessage(text) {
+  const c = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'message bot';
+  div.innerHTML = `<div class="msg-avatar">⚠️</div><div class="msg-bubble" style="color:#ff6b6b;font-size:0.82rem">${esc(text)}</div>`;
+  c.appendChild(div);
+  scrollToBottom();
+}
+
+function fmt(t) {
+  let h = esc(t);
+  h = h.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/`(.*?)`/g, '<code>$1</code>');
+  h = h.replace(/\n/g, '<br>');
+  return h;
+}
+
+function esc(t) {
+  const d = document.createElement('div');
+  d.textContent = t;
+  return d.innerHTML;
+}
+
+function scrollToBottom() {
+  const c = document.getElementById('chatMessages');
+  c.scrollTop = c.scrollHeight;
+}
+
+function updateSendBtn() {
+  document.getElementById('sendBtn').disabled = state.isStreaming;
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ===== CHIPS =====
+function buildChips() {
+  const chips = document.getElementById('quickChips');
+  const fa = [
+    { emoji: '📋', text: 'برنامه هفتگی' },
+    { emoji: '🥊', text: 'جَب و کراس' },
+    { emoji: '👟', text: 'فوت‌ورک' },
+    { emoji: '🛡️', text: 'دفاع' },
+    { emoji: '⚡', text: 'کمبینیشن' },
+    { emoji: '💪', text: 'تناسب اندام' }
+  ];
+  const en = [
+    { emoji: '📋', text: 'Weekly Plan' },
+    { emoji: '🥊', text: 'Jab & Cross' },
+    { emoji: '👟', text: 'Footwork' },
+    { emoji: '🛡️', text: 'Defense' },
+    { emoji: '⚡', text: 'Combo' },
+    { emoji: '💪', text: 'Fitness' }
+  ];
+  const items = state.lang === 'fa' ? fa : en;
+  const prompts = state.lang === 'fa'
+    ? ['یه برنامه تمرینی یک هفته‌ای برای مبتدی بنویس', 'جَب و کراس رو کامل توضیح بده', 'فوت‌ورک چیه و چطور یادش بگیرم؟', 'راه‌های دفاع در برابر ضربه حریف', 'یه کمبینیشن سه ضربه‌ای یادم بده', 'تمرینات تناسب اندام با بوکس']
+    : ['Write a one-week beginner training plan', 'Explain jab and cross in detail', 'What is footwork and how do I learn it?', 'Defensive techniques against punches', 'Teach me a 3-punch combination', 'Boxing fitness exercises'];
+  chips.innerHTML = '';
+  items.forEach((item, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = item.emoji + ' ' + item.text;
+    btn.dataset.prompt = prompts[i];
+    btn.addEventListener('click', () => {
+      document.getElementById('userInput').value = item.text;
+      sendMessage(item.text);
+    });
+    chips.appendChild(btn);
+  });
+}
+
+// ===== INPUT =====
+document.getElementById('userInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(document.getElementById('userInput').value.trim()); }
+});
+document.getElementById('userInput').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+document.getElementById('sendBtn').addEventListener('click', () => {
+  sendMessage(document.getElementById('userInput').value.trim());
+  document.getElementById('userInput').value = '';
+  document.getElementById('userInput').style.height = 'auto';
+});
+
+// Clear
+document.getElementById('clearBtn').addEventListener('click', () => {
+  if (confirm(state.lang === 'fa' ? 'همه پیام‌ها پاک بشن؟' : 'Clear all messages?')) {
+    state.messages = [];
+    document.getElementById('chatMessages').innerHTML = '';
+    addBotMessage(state.lang === 'fa' ? '🗑️ چت پاک شد. دوباره شروع کنیم؟' : '🗑️ Chat cleared. Start fresh?');
+    saveState();
+  }
+});
+
+// Settings (re-open token screen)
+document.getElementById('settingsBtn').addEventListener('click', () => {
+  document.getElementById('chatScreen').classList.remove('active');
+  document.getElementById('tokenScreen').classList.add('active');
+  document.getElementById('apiKeyInput').value = state.apiKey;
+  document.getElementById('modelSelect').value = state.model;
+  document.getElementById('langSelect').value = state.lang;
+});
+
+// Voice
+let recognition = null;
+document.getElementById('voiceBtn').addEventListener('click', () => {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast('مرورگرت پشتیبانی نمی‌کنه'); return; }
+  const btn = document.getElementById('voiceBtn');
+  if (recognition?.active) { recognition.stop(); return; }
+  recognition = new SR();
+  recognition.lang = state.lang === 'fa' ? 'fa-IR' : 'en-US';
+  recognition.onstart = () => btn.classList.add('recording');
+  recognition.onend = () => btn.classList.remove('recording');
+  recognition.onresult = e => {
+    const t = e.results[0][0].transcript;
+    document.getElementById('userInput').value = t;
+    sendMessage(t);
+  };
+  recognition.onerror = () => showToast('خطا در تشخیص صدا');
+  recognition.start();
+});
+</script>
 </body>
 </html>
