@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مربی بوکس هوشمند | Boxing Coach AI</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">🥊</span>
+      <div class="logo-text">
+        <h1>مربی بوکس</h1>
+        <p>Boxing Coach AI</p>
+      </div>
+    </div>
+    <div class="header-controls">
+      <button id="langToggle" class="btn-lang">EN/FA</button>
+      <button id="clearChat" class="btn-clear" title="پاک کردن چت">🗑️</button>
+      <button id="settingsBtn" class="btn-settings">⚙️</button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <main class="main-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <h3>🎯 مسیر یادگیری</h3>
+        <div class="training-paths">
+          <button class="path-btn active" data-path="beginner">
+            <span class="path-icon">🌱</span>
+            <span class="path-name" data-fa="مبتدی" data-en="Beginner">مبتدی</span>
+          </button>
+          <button class="path-btn" data-path="intermediate">
+            <span class="path-icon">🔥</span>
+            <span class="path-name" data-fa="متوسط" data-en="Intermediate">متوسط</span>
+          </button>
+          <button class="path-btn" data-path="advanced">
+            <span class="path-icon">💎</span>
+            <span class="path-name" data-fa="پیشرفته" data-en="Advanced">پیشرفته</span>
+          </button>
+          <button class="path-btn" data-path="fitness">
+            <span class="path-icon">💪</span>
+            <span class="path-name" data-fa="تناسب اندام" data-en="Fitness">تناسب اندام</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>📚 موضوعات محبوب</h3>
+        <div class="topics">
+          <button class="topic-btn" data-topic="jab-cross">جَب و کراس 🥊</button>
+          <button class="topic-btn" data-topic="footwork">فوت‌ورک</button>
+          <button class="topic-btn" data-topic="defense">دفاع شخصی</button>
+          <button class="topic-btn" data-topic="conditioning">تمرین استقامت</button>
+          <button class="topic-btn" data-topic="combination">کمبینیشن‌ها</button>
+          <button class="topic-btn" data-topic="weight-loss">کاهش وزن</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="stats-box">
+          <div class="stat-item">
+            <span class="stat-value" id="msgCount">0</span>
+            <span class="stat-label" data-fa="پیام" data-en="Messages">پیام</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="sessionId">-</span>
+            <span class="stat-label" data-fa="جلسه" data-en="Session">جلسه</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Chat Area -->
+    <section class="chat-area">
+      <div class="chat-header">
+        <button id="menuToggle" class="menu-toggle">☰</button>
+        <div class="chat-title">
+          <span class="status-dot"></span>
+          <span data-fa="مربی هوشمند شما آماده است" data-en="Your AI Coach is Ready">مربی هوشمند شما آماده است</span>
+        </div>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <!-- Welcome message -->
+        <div class="message bot-message">
+          <div class="avatar">🥊</div>
+          <div class="bubble">
+            <p data-fa="سلام! من مربی هوش مصنوعی بوکس تو هستم. 🤜" data-en="Hi! I'm your AI Boxing Coach. 🤜">سلام! من مربی هوش مصنوعی بوکس تو هستم. 🤜</p>
+            <p data-fa="می‌تونی هر سوالی درباره بوکس داری بپرسی. مثلاً:" data-en="Ask me anything about boxing. For example:">می‌تونی هر سوالی درباره بوکس داری بپرسی. مثلاً:</p>
+            <ul>
+              <li data-fa="جَب چیست و چطور یادش بگیرم؟" data-en="What is a jab and how do I learn it?">جَب چیست و چطور یادش بگیرم؟</li>
+              <li data-fa="برنامه تمرینی یک هفته‌ای می‌خوام" data-en="I want a one-week training plan">برنامه تمرینی یک هفته‌ای می‌خوام</li>
+              <li data-fa="چطور ضربه کراس بزنم؟" data-en="How do I throw a cross?">چطور ضربه کراس بزنم؟</li>
+              <li data-fa="راه‌های دفاع در برابر حریف" data-en="Ways to defend against an opponent">راه‌های دفاع در برابر حریف</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions" id="quickActions">
+        <button class="quick-btn" data-prompt="یه برنامه تمرینی برای مبتدی‌ها طراحی کن">📋 برنامه تمرینی</button>
+        <button class="quick-btn" data-prompt="یه کمبینیشن ساده یادم بده">🥊 کمبینیشن ساده</button>
+        <button class="quick-btn" data-prompt="چطور مستقیم وارد بوکس بشم؟" data-fa-only>ورود به بوکس</button>
+        <button class="quick-btn" data-prompt="ویدیو آموزشی فوت‌ورک" data-fa-only>👟 فوت‌ورک</button>
+      </div>
+
+      <!-- Input Area -->
+      <div class="chat-input-area">
+        <textarea id="userInput" class="chat-input" rows="1" 
+          data-placeholder-fa="پیامت رو بنویس... (Enter = ارسال، Shift+Enter = خط جدید)"
+          data-placeholder-en="Type your message... (Enter = send, Shift+Enter = new line)"
+          placeholder="پیامت رو بنویس..."></textarea>
+        <button id="sendBtn" class="send-btn" aria-label="ارسال">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+        <button id="voiceBtn" class="voice-btn" title="Voice input">🎤</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 data-fa="⚙️ تنظیمات" data-en="⚙️ Settings">⚙️ تنظیمات</h2>
+        <button class="modal-close" id="closeSettings">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-group">
+          <label data-fa="کلید API (OpenAI)" data-en="API Key (OpenAI)">کلید API (OpenAI)</label>
+          <input type="password" id="apiKeyInput" class="setting-input" 
+            placeholder="sk-..." autocomplete="off">
+          <small data-fa="کلیدت فقط در مرورگرت می‌مونه" data-en="Your key stays only in your browser">کلیدت فقط در مرورگرت می‌مونه</small>
+        </div>
+        <div class="setting-group">
+          <label data-fa="مدل هوش مصنوعی" data-en="AI Model">مدل هوش مصنوعی</label>
+          <select id="modelSelect" class="setting-input">
+            <option value="gpt-4o-mini">GPT-4o Mini (سریع + ارزان)</option>
+            <option value="gpt-4o">GPT-4o (قدرتمند)</option>
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (سبک)</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label data-fa="زبان رابط کاربری" data-en="UI Language">زبان رابط کاربری</label>
+          <select id="langSelect" class="setting-input">
+            <option value="fa">فارسی</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="saveSettings" class="btn-save">ذخیره ✅</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
